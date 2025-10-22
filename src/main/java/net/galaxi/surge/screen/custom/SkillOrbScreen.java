@@ -1,6 +1,9 @@
 package net.galaxi.surge.screen.custom;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.galaxi.surge.Surge;
+import net.galaxi.surge.network.SelectSkillPacket;
+import net.galaxi.surge.skill.Skill;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -8,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -17,8 +20,6 @@ public class SkillOrbScreen extends AbstractContainerScreen<SkillOrbMenu> {
     private static final int CARD_WIDTH = 93;
     private static final int CARD_HEIGHT = 140;
     private static final int MAX_CARD_SPACING = 20;
-
-    private static final ResourceLocation CARD_BASE = ResourceLocation.fromNamespaceAndPath(Surge.MOD_ID, "textures/skill_cards/skill_card_base.png");
 
     private int hoveredCard = -1;
     private float[] cardAnimations;
@@ -45,6 +46,14 @@ public class SkillOrbScreen extends AbstractContainerScreen<SkillOrbMenu> {
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        List<Skill> skills = this.menu.getAvailableSkills();
+        this.cardCount = skills.size();
+
+        if (this.cardAnimations.length != cardCount) {
+            this.cardAnimations = new float[cardCount];
+            this.idleOffsets = new float[cardCount];
+        }
+
         float time = (System.currentTimeMillis() - openTime) / 455f;
         int spacing = calculateSpacing();
         int totalWidth = CARD_WIDTH * cardCount + spacing * (cardCount - 1);
@@ -55,6 +64,8 @@ public class SkillOrbScreen extends AbstractContainerScreen<SkillOrbMenu> {
         float staggerPerCard = Math.max(0.05f, 0.055f / cardCount);
 
         for (int i = 0; i < cardCount; i++) {
+            Skill skill = skills.get(i);
+
             float targetAnim = hoveredCard == i ? 1.0f : 0.0f;
             cardAnimations[i] += (targetAnim - cardAnimations[i]) * 0.2f;
 
@@ -90,19 +101,18 @@ public class SkillOrbScreen extends AbstractContainerScreen<SkillOrbMenu> {
 
             pose.translate(-CARD_WIDTH / 2f, -CARD_HEIGHT / 2f, 0);
 
-            graphics.blit(CARD_BASE, 0, 0, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
+            graphics.blit(skill.getTexture(), 0, 0, 0, 0, CARD_WIDTH, CARD_HEIGHT, CARD_WIDTH, CARD_HEIGHT);
 
             pose.translate(0, 0, 0.1f);
 
             float scaleX = CARD_WIDTH / 32f;
             float scaleY = CARD_HEIGHT / 48f;
 
-            graphics.drawString(this.font, "Skill Card", (int)(2 * scaleX), (int)(3 * scaleY), 0x000000, false);
+            graphics.drawString(this.font, skill.getName(), (int)(2 * scaleX), (int)(3 * scaleY), skill.getRarity().getColor(), false);
 
-            String desc = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
             int maxWidth = (int)(27 * scaleX);
             int y = (int)(26.5 * scaleY);
-            List<FormattedCharSequence> lines = this.font.split(Component.literal(desc), maxWidth);
+            List<FormattedCharSequence> lines = this.font.split(skill.getDescription(), maxWidth);
             for (FormattedCharSequence line : lines) {
                 graphics.drawString(this.font, line, (int)(2 * scaleX), y, 0x000000, false);
                 y += 9;
@@ -153,7 +163,9 @@ public class SkillOrbScreen extends AbstractContainerScreen<SkillOrbMenu> {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (hoveredCard != -1) {
+        if (hoveredCard != -1 && hoveredCard < this.menu.getAvailableSkills().size()) {
+            Skill selected = this.menu.getAvailableSkills().get(hoveredCard);
+            PacketDistributor.sendToServer(new SelectSkillPacket(selected.getId()));
             this.onClose();
             return true;
         }

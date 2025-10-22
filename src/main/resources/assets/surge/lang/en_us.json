@@ -1,3 +1,6 @@
 {
-  "item.surge.skill_orb": "Skill Orb"
+  "item.surge.skill_orb": "Skill Orb",
+
+  "key.categories.surge": "Surge Skills",
+  "key.surge.open_skill_loadout": "Open Skill Loadout"
 }

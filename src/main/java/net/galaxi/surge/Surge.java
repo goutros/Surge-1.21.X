@@ -1,7 +1,10 @@
 package net.galaxi.surge;
 
 import net.galaxi.surge.item.ModItems;
+import net.galaxi.surge.network.ModNetworking;
 import net.galaxi.surge.screen.ModMenuTypes;
+import net.galaxi.surge.skill.ModAttachments;
+import net.galaxi.surge.skill.ModSkills;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -52,10 +55,13 @@ public class Surge {
 
         ModItems.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
+        ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
+        ModSkills.register();
 
         // Register the item to a creative tab
 
         modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(ModNetworking::register);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
 
