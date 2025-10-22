@@ -1,0 +1,30 @@
+{
+  "card_hover": {
+    "subtitle": "subtitles.surge.card_hover",
+    "sounds": [
+      {
+        "name": "surge:card_hover",
+        "volume": 0.5,
+        "pitch": 1.0,
+        "stream": false
+      }
+    ]
+  },
+  "card_select": {
+    "subtitle": "subtitles.surge.card_select",
+    "sounds": [
+      {
+        "name": "surge:card_select",
+        "volume": 0.7,
+        "pitch": 1.0,
+        "stream": false
+      },
+      {
+        "name": "surge:card_select_variant",
+        "volume": 0.7,
+        "pitch": 1.0,
+        "stream": false
+      }
+    ]
+  }
+}
