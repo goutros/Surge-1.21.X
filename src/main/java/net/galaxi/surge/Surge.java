@@ -1,5 +1,7 @@
 package net.galaxi.surge;
 
+import net.galaxi.surge.item.ModItems;
+import net.galaxi.surge.screen.ModMenuTypes;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -45,12 +47,18 @@ public class Surge {
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (Surge) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
+
         NeoForge.EVENT_BUS.register(this);
 
+        ModItems.register(modEventBus);
+        ModMenuTypes.MENUS.register(modEventBus);
+
         // Register the item to a creative tab
+
         modEventBus.addListener(this::addCreative);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
+
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
@@ -60,8 +68,8 @@ public class Surge {
 
     // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(ModItems.SKILL_ORB);
         }
     }
 
